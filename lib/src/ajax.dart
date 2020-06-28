@@ -6,10 +6,10 @@ class StatusEvent extends event.Event {
   StatusEvent(String type, [this.status = 0, this.text = ""]) : super(type);
 }
 
-typedef AbstractXHRObject AjaxObjectFactory(String method, String baseUrl, [payload]);
+typedef AbstractXHRObject AjaxObjectFactory(String method, String baseUrl,
+    [payload]);
 
 class AbstractXHRObject extends Object with event.Emitter {
-
   HttpRequest xhr;
   StreamSubscription changeSubscription;
 
@@ -18,19 +18,20 @@ class AbstractXHRObject extends Object with event.Emitter {
   Stream get onTimeout => this["timeout"];
 
   _start(method, url, payload, {noCredentials: false, headers}) {
-
     try {
-        xhr = new HttpRequest();
-    } catch(x) {};
+      xhr = new HttpRequest();
+    } catch (x) {}
+    ;
 
-    if ( xhr == null ) {
-        try {
-            // TODO(nelsonsilva) - xhr = new window['ActiveXObject']('Microsoft.XMLHTTP');
-        } catch(x) {};
+    if (xhr == null) {
+      try {
+        // TODO(nelsonsilva) - xhr = new window['ActiveXObject']('Microsoft.XMLHTTP');
+      } catch (x) {}
+      ;
     }
     // TODO(nelsonsilva)
     //if ( window['ActiveXObject'] != null || window['XDomainRequest'] != null) {
-        // IE8 caches even POSTs
+    // IE8 caches even POSTs
     //    url += ((url.indexOf('?') === -1) ? '?' : '&') + 't='+(+new Date);
     //}
 
@@ -39,21 +40,22 @@ class AbstractXHRObject extends Object with event.Emitter {
     //that.unload_ref = utils.unload_add(function(){that._cleanup(true);});
 
     try {
-        xhr.open(method, url);
-    } catch(e) {
-        // IE raises an exception on wrong port.
-        dispatch(new StatusEvent("finish"));
-        _cleanup();
-        return;
-    };
+      xhr.open(method, url);
+    } catch (e) {
+      // IE raises an exception on wrong port.
+      dispatch(new StatusEvent("finish"));
+      _cleanup();
+      return;
+    }
+    ;
 
     if (!noCredentials) {
-        // Mozilla docs says https://developer.mozilla.org/en/XMLHttpRequest :
-        // "This never affects same-site requests."
-        xhr.withCredentials = true;
+      // Mozilla docs says https://developer.mozilla.org/en/XMLHttpRequest :
+      // "This never affects same-site requests."
+      xhr.withCredentials = true;
     }
     if (headers != null) {
-        headers.forEach((k, v) => xhr.setRequestHeader(k, v));
+      headers.forEach((k, v) => xhr.setRequestHeader(k, v));
     }
 
     changeSubscription = xhr.onReadyStateChange.listen(_readyStateHandler);
@@ -70,7 +72,8 @@ class AbstractXHRObject extends Object with event.Emitter {
         try {
           status = xhr.status;
           text = xhr.responseText;
-        } catch (x) {};
+        } catch (x) {}
+        ;
         // IE does return readystate == 3 for 404 answers.
         if (text != null && !text.isEmpty) {
           dispatch(new StatusEvent("chunk", status, text));
@@ -84,7 +87,6 @@ class AbstractXHRObject extends Object with event.Emitter {
   }
 
   _cleanup([abort = false]) {
-
     if (xhr == null) return;
     // utils.unload_del(that.unload_ref);
 
@@ -92,12 +94,13 @@ class AbstractXHRObject extends Object with event.Emitter {
     changeSubscription.cancel();
 
     if (abort) {
-        try {
-            xhr.abort();
-        } catch(x) {};
+      try {
+        xhr.abort();
+      } catch (x) {}
+      ;
     }
     //that.unload_ref = that.xhr = null;
-}
+  }
 
   close() {
     // TODO(nelsonsilva) - nuke();
@@ -106,31 +109,31 @@ class AbstractXHRObject extends Object with event.Emitter {
 }
 
 class XHRCorsObject extends AbstractXHRObject {
-   XHRCorsObject(method, url, payload, {noCredentials, headers} )  {
-    Timer.run(() =>_start(method, url, payload, noCredentials: false));
-   }
+  XHRCorsObject(String method, String url, payload, {noCredentials, headers}) {
+    Timer.run(() => _start(method, url, payload, noCredentials: false));
+  }
 }
-
-
 
 class XHRLocalObject extends AbstractXHRObject {
-  XHRLocalObject (method, url, payload, {noCredentials, headers}) {
-    Timer.run(() =>_start(method, url, payload, noCredentials: true));
-    }
+  XHRLocalObject(String method, String url, payload, {noCredentials, headers}) {
+    Timer.run(() => _start(method, url, payload, noCredentials: true));
+  }
 }
 
-XHRLocalObjectFactory(method, baseUrl, [payload]) => new XHRLocalObject(method, baseUrl, payload);
+XHRLocalObjectFactory(String method, String baseUrl, [payload]) =>
+    new XHRLocalObject(method, baseUrl, payload);
 
-XHRCorsObjectFactory(method, baseUrl, [payload]) => new XHRCorsObject(method, baseUrl, payload);
+XHRCorsObjectFactory(String method, String baseUrl, [payload]) =>
+    new XHRCorsObject(method, baseUrl, payload);
 
 // 1. Is natively via XHR
 // 2. Is natively via XDR
 // 3. Nope, but postMessage is there so it should work via the Iframe.
 // 4. Nope, sorry.
 isXHRCorsCapable() {
-    return 1;
+  return 1;
 
-    /*
+  /*
     if (window["XMLHttpRequest"] != null && window["'withCredentials' in new XMLHttpRequest()) {
         return 1;
     }

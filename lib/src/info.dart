@@ -23,36 +23,31 @@ class InfoReceiverEvent extends event.Event {
 }
 
 abstract class InfoReceiver extends Object with event.Emitter {
-
   InfoReceiver._();
 
   Stream<event.Event> get onFinish => this["finish"];
 
   factory InfoReceiver.forURL(String baseUrl) {
     if (utils.isSameOriginUrl(baseUrl)) {
-        // If, for some reason, we have SockJS locally - there's no
-        // need to start up the complex machinery. Just use ajax.
-        return new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
+      return new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
     }
     switch (isXHRCorsCapable()) {
       case 1:
-          // XHRLocalObject -> no_credentials=true
-          return new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
+        return new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
       case 2:
-          //return new AjaxInfoReceiver(baseUrl, utils.XDRObject);
+      //return new AjaxInfoReceiver(baseUrl, utils.XDRObject);
       case 3:
-          // Opera
-          return new InfoReceiverIframe(baseUrl);
+        // Opera
+        return new InfoReceiverIframe(baseUrl);
       default:
-          // IE 7
-          return new InfoReceiverFake();
+        // IE 7
+        return new InfoReceiverFake();
     }
   }
 }
 
 class AjaxInfoReceiver extends InfoReceiver {
-
-  AjaxInfoReceiver(String baseUrl, AjaxObjectFactory xhrFactory) : super._() {
+  AjaxInfoReceiver(String baseUrl, dynamic xhrFactory) : super._() {
     Timer.run(() => doXhr(baseUrl, xhrFactory));
   }
 
@@ -60,40 +55,39 @@ class AjaxInfoReceiver extends InfoReceiver {
     var t0 = new DateTime.now().millisecondsSinceEpoch;
     var xo = xhrFactory('GET', "$baseUrl/info");
 
-    var tref = new Timer(new Duration(milliseconds:8000), () => dispatch("timeout"));
+    var tref =
+        new Timer(new Duration(milliseconds: 8000), () => dispatch("timeout"));
 
-    xo.onFinish.listen( (StatusEvent evt) {
-        tref.cancel();
-        tref = null;
-        if (evt.status == 200) {
-            var rtt = new DateTime.now().millisecondsSinceEpoch - t0;
-            var info = new Info.fromJSON(JSON.decode(evt.text));
-            dispatch(new InfoReceiverEvent("finish", info, rtt));
-        } else {
-            dispatch(new InfoReceiverEvent("finish"));
-        }
-    });
-    xo.onTimeout.listen( (_) {
-        xo.close();
+    xo.onFinish.listen((evt) {
+      tref.cancel();
+      tref = null;
+      if (evt.status == 200) {
+        var rtt = new DateTime.now().millisecondsSinceEpoch - t0;
+        var info = new Info.fromJSON(json.decode(evt.text));
+        dispatch(new InfoReceiverEvent("finish", info, rtt));
+      } else {
         dispatch(new InfoReceiverEvent("finish"));
+      }
+    });
+    xo.onTimeout.listen((_) {
+      xo.close();
+      dispatch(new InfoReceiverEvent("finish"));
     });
   }
 }
 
-
 class InfoReceiverIframe extends InfoReceiver {
-
   InfoReceiverIframe(base_url) : super._() {
-    if(document.body == null) {
+    if (document.body == null) {
       document.onLoad.listen((_) => go());
     } else {
-        go();
+      go();
     }
   }
 
-    go() {
-      // TODO(nelsonsilva)
-      /*
+  go() {
+    // TODO(nelsonsilva)
+    /*
       var ifr = new IframeTransport();
       ifr.protocol = 'w-iframe-info-receiver';
       var fun = function(r) {
@@ -114,29 +108,26 @@ class InfoReceiverIframe extends InfoReceiver {
       };
       ifr.i_constructor(mock_ri, base_url, base_url);
       */
-    }
+  }
 }
 
-
 class InfoReceiverFake extends InfoReceiver {
-
   InfoReceiverFake() : super._() {
     // It may not be possible to do cross domain AJAX to get the info
     // data, for example for IE7. But we want to run JSONP, so let's
     // fake the response, with rtt=2s (rto=6s).
-    new Timer(new Duration(milliseconds:2000), () => dispatch("finish"));
+    new Timer(new Duration(milliseconds: 2000), () => dispatch("finish"));
   }
 }
-
 
 // FacadeJS['w-iframe-info-receiver']
-class WInfoReceiverIframe {
-  WInfoReceiverIframe(ri, _trans_url, baseUrl) {
-    var ir = new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
-    ir.onFinish.listen( (evt) {
-        ri._didMessage('m${JSON.encode([evt.info, evt.rtt])}');
-        ri._didClose();
-    });
-  }
-  doCleanup() {}
-}
+// class WInfoReceiverIframe {
+//   WInfoReceiverIframe(ri, _trans_url, baseUrl) {
+//     var ir = new AjaxInfoReceiver(baseUrl, XHRLocalObjectFactory);
+//     ir.onFinish.listen((evt) {
+//       ri._didMessage('m${JSON.encode([evt.info, evt.rtt])}');
+//       ri._didClose();
+//     });
+//   }
+//   doCleanup() {}
+// }

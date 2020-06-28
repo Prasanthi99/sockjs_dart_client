@@ -1,0 +1,20 @@
+{
+  "configVersion": 2,
+  "packages": [
+    {
+      "name": "logging",
+      "rootUri": "file:///C:/Users/prasanthi.y/AppData/Roaming/Pub/Cache/hosted/pub.dartlang.org/logging-0.11.4",
+      "packageUri": "lib/",
+      "languageVersion": "2.0"
+    },
+    {
+      "name": "sockjs_client",
+      "rootUri": "../",
+      "packageUri": "lib/",
+      "languageVersion": "2.1"
+    }
+  ],
+  "generated": "2020-06-28T15:44:10.161594Z",
+  "generator": "pub",
+  "generatorVersion": "2.7.0"
+}

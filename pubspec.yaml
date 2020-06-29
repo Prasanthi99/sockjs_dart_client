@@ -1,4 +1,4 @@
-name:  sockjs_client
+name:  sockjs_dart_client
 version: 0.2.0
 description:  A SockJS client in Dart
 dependencies:

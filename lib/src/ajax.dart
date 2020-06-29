@@ -1,4 +1,4 @@
-part of sockjs_client;
+part of sockjs_dart_client;
 
 class StatusEvent extends event.Event {
   int status;

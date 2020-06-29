@@ -1,4 +1,4 @@
-library sockjs_client;
+library sockjs_dart_client;
 
 import "dart:html";
 import "dart:convert";

@@ -1,4 +1,4 @@
-part of sockjs_client;
+part of sockjs_dart_client;
 
 class Receiver extends Object with event.Emitter {
   Stream get onMessage => this["message"];

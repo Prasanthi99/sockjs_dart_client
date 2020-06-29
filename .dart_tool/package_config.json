@@ -8,13 +8,13 @@
       "languageVersion": "2.0"
     },
     {
-      "name": "sockjs_client",
+      "name": "sockjs_dart_client",
       "rootUri": "../",
       "packageUri": "lib/",
       "languageVersion": "2.1"
     }
   ],
-  "generated": "2020-06-28T15:44:10.161594Z",
+  "generated": "2020-06-29T06:53:24.322373Z",
   "generator": "pub",
   "generatorVersion": "2.7.0"
 }
